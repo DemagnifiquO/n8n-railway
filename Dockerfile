@@ -21,17 +21,9 @@ RUN apk add --no-cache \
     ca-certificates \
     ttf-freefont
 
-# Create custom node directory and install community nodes
-RUN mkdir -p /home/node/.n8n/nodes && \
-    cd /home/node/.n8n/nodes && \
-    npm init -y && \
-    npm install n8n-nodes-puppeteer @tavily/n8n-nodes-tavily && \
-    chown -R node:node /home/node/.n8n
-
-# Environment variables for Chromium & Community Nodes
+# Environment variables for Puppeteer & Community Nodes
 ENV PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium-browser
 ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true
 ENV N8N_COMMUNITY_PACKAGES_ENABLED=true
-ENV N8N_CUSTOM_EXTENSIONS=/home/node/.n8n/nodes
 
 USER node

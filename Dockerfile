@@ -1,21 +1,28 @@
-  FROM n8nio/n8n:latest
+FROM n8nio/n8n:latest
 
 USER root
 
-# Install Chromium and required fonts for Debian/Ubuntu-based n8n image
-RUN apt-get update && apt-get install -y \
-    chromium \
-    fonts-ipafont-gothic \
-    fonts-wqy-zenhei \
-    fonts-thai-tlwg \
-    fonts-kacst \
-    fonts-freefont-ttf \
-    libxss1 \
-    --no-install-recommends \
-    && rm -rf /var/lib/apt/lists/*
+# Re-enable apk package manager in n8n runtime
+RUN ARCH=$(uname -m) && \
+    wget -qO- "http://dl-cdn.alpinelinux.org/alpine/latest-stable/main/${ARCH}/" | \
+    grep -o 'href="apk-tools-static-[^"]*\.apk"' | head -1 | cut -d'"' -f2 | \
+    xargs -I {} wget -q "http://dl-cdn.alpinelinux.org/alpine/latest-stable/main/${ARCH}/{}" && \
+    tar -xzf apk-tools-static-*.apk && \
+    ./sbin/apk.static -X http://dl-cdn.alpinelinux.org/alpine/latest-stable/main \
+    -U --allow-untrusted add apk-tools && \
+    rm -rf sbin apk-tools-static-*.apk
 
-# Tell Puppeteer exactly where to find Chromium
-ENV PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium
+# Install Chromium, fonts, and dependencies
+RUN apk add --no-cache \
+    chromium \
+    nss \
+    freetype \
+    harfbuzz \
+    ca-certificates \
+    ttf-freefont
+
+# Environment variables for Puppeteer
+ENV PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium-browser
 ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true
 
 USER node

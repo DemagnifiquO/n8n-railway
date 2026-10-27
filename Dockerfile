@@ -22,7 +22,8 @@ RUN apk add --no-cache \
     ttf-freefont
 
 # Environment variables for Puppeteer & Community Nodes
-ENV PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium-browser
+ENV PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium
+ENV EXECUTABLE_PATH=/usr/bin/chromium
 ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true
 ENV N8N_COMMUNITY_PACKAGES_ENABLED=true
 

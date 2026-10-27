@@ -2,19 +2,8 @@ FROM n8nio/n8n:latest
 
 USER root
 
-# Enable apk package manager in n8n's Alpine runtime
-RUN ARCH=$(uname -m) && \
-    wget -qO- "http://dl-cdn.alpinelinux.org/alpine/latest-stable/main/${ARCH}/" | \
-    grep -o 'href="apk-tools-static-[^"]*\.apk"' | head -1 | cut -d'"' -f2 | \
-    xargs -I {} wget -q "http://dl-cdn.alpinelinux.org/alpine/latest-stable/main/${ARCH}/{}" && \
-    tar -xzf apk-tools-static-*.apk && \
-    ./sbin/apk.static -X http://dl-cdn.alpinelinux.org/alpine/latest-stable/main \
-    -U --allow-untrusted add apk-tools && \
-    rm -rf sbin apk-tools-static-*.apk
-
-# Install Chromium and required font/system libraries
+# Install system dependencies required for Chromium rendering on Alpine
 RUN apk add --no-cache \
-    chromium \
     nss \
     freetype \
     harfbuzz \
@@ -23,13 +12,7 @@ RUN apk add --no-cache \
     udev \
     dbus
 
-# Symlink so both paths work seamlessly
-RUN ln -sf /usr/bin/chromium /usr/bin/chromium-browser 2>/dev/null || true
-
-# Force Puppeteer to use system Chromium
-ENV PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium
-ENV EXECUTABLE_PATH=/usr/bin/chromium
-ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true
-ENV N8N_COMMUNITY_PACKAGES_ENABLED=true
-
 USER node
+
+# Automatically download the exact browser version required by Puppeteer during the build
+RUN npx puppeteer browsers install chrome

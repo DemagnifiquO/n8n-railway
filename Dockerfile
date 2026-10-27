@@ -23,9 +23,12 @@ RUN apk add --no-cache \
     udev \
     dbus
 
-# Force Puppeteer to use the system-installed browser binary path
-ENV PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium-browser
-ENV EXECUTABLE_PATH=/usr/bin/chromium-browser
+# Symlink so both paths work seamlessly
+RUN ln -sf /usr/bin/chromium /usr/bin/chromium-browser 2>/dev/null || true
+
+# Force Puppeteer to use system Chromium
+ENV PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium
+ENV EXECUTABLE_PATH=/usr/bin/chromium
 ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true
 ENV N8N_COMMUNITY_PACKAGES_ENABLED=true
 

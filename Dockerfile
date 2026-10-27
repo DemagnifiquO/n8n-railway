@@ -12,7 +12,7 @@ RUN ARCH=$(uname -m) && \
     -U --allow-untrusted add apk-tools && \
     rm -rf sbin apk-tools-static-*.apk
 
-# Install Chromium and required font/system dependencies
+# Install Chromium and required font/system libraries
 RUN apk add --no-cache \
     chromium \
     nss \
@@ -23,7 +23,7 @@ RUN apk add --no-cache \
     udev \
     dbus
 
-# Configure environment paths for Puppeteer
+# Force Puppeteer to use the system-installed browser binary path
 ENV PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium-browser
 ENV EXECUTABLE_PATH=/usr/bin/chromium-browser
 ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true

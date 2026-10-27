@@ -27,5 +27,8 @@ RUN apk add --no-cache \
 ENV PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium
 ENV EXECUTABLE_PATH=/usr/bin/chromium
 ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true
-
+# Satisfy the community Puppeteer node's hardcoded path requirement
+RUN mkdir -p /home/node/.cache/puppeteer/chrome/linux-148.0.7778.97/chrome-linux64 && \
+    ln -s /usr/bin/chromium /home/node/.cache/puppeteer/chrome/linux-148.0.7778.97/chrome-linux64/chrome
+    
 USER node

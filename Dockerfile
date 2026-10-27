@@ -2,7 +2,17 @@ FROM n8nio/n8n:latest
 
 USER root
 
-# Install system Chromium and rendering fonts on Alpine Linux
+# Enable apk package manager in n8n's Alpine runtime
+RUN ARCH=$(uname -m) && \
+    wget -qO- "http://dl-cdn.alpinelinux.org/alpine/latest-stable/main/${ARCH}/" | \
+    grep -o 'href="apk-tools-static-[^"]*\.apk"' | head -1 | cut -d'"' -f2 | \
+    xargs -I {} wget -q "http://dl-cdn.alpinelinux.org/alpine/latest-stable/main/${ARCH}/{}" && \
+    tar -xzf apk-tools-static-*.apk && \
+    ./sbin/apk.static -X http://dl-cdn.alpinelinux.org/alpine/latest-stable/main \
+    -U --allow-untrusted add apk-tools && \
+    rm -rf sbin apk-tools-static-*.apk
+
+# Install Chromium and required font/system dependencies
 RUN apk add --no-cache \
     chromium \
     nss \
@@ -13,7 +23,7 @@ RUN apk add --no-cache \
     udev \
     dbus
 
-# Point Puppeteer globally to the system Chromium binary path
+# Configure environment paths for Puppeteer
 ENV PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium-browser
 ENV EXECUTABLE_PATH=/usr/bin/chromium-browser
 ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true

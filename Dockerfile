@@ -21,9 +21,13 @@ RUN apk add --no-cache \
     ca-certificates \
     ttf-freefont
 
+# Bulletproof symlink so both paths exist and point to the browser
+RUN if [ -f /usr/bin/chromium-browser ]; then ln -sf /usr/bin/chromium-browser /usr/bin/chromium; \
+    elif [ -f /usr/bin/chromium ]; then ln -sf /usr/bin/chromium /usr/bin/chromium-browser; fi
+
 # Environment variables for Puppeteer & Community Nodes
-ENV PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium
-ENV EXECUTABLE_PATH=/usr/bin/chromium
+ENV PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium-browser
+ENV EXECUTABLE_PATH=/usr/bin/chromium-browser
 ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true
 ENV N8N_COMMUNITY_PACKAGES_ENABLED=true
 

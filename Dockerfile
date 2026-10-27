@@ -2,7 +2,7 @@ FROM n8nio/n8n:latest
 
 USER root
 
-# Re-enable apk package manager in n8n runtime
+# Re-emable apk package manager and install required font/system libraries for rendering
 RUN ARCH=$(uname -m) && \
     wget -qO- "http://dl-cdn.alpinelinux.org/alpine/latest-stable/main/${ARCH}/" | \
     grep -o 'href="apk-tools-static-[^"]*\.apk"' | head -1 | cut -d'"' -f2 | \
@@ -12,23 +12,20 @@ RUN ARCH=$(uname -m) && \
     -U --allow-untrusted add apk-tools && \
     rm -rf sbin apk-tools-static-*.apk
 
-# Install Chromium and required fonts
 RUN apk add --no-cache \
-    chromium \
     nss \
     freetype \
     harfbuzz \
     ca-certificates \
-    ttf-freefont
+    ttf-freefont \
+    udev \
+    dbus
 
-# Bulletproof symlink so both paths exist and point to the browser
-RUN if [ -f /usr/bin/chromium-browser ]; then ln -sf /usr/bin/chromium-browser /usr/bin/chromium; \
-    elif [ -f /usr/bin/chromium ]; then ln -sf /usr/bin/chromium /usr/bin/chromium-browser; fi
-
-# Environment variables for Puppeteer & Community Nodes
-ENV PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium-browser
-ENV EXECUTABLE_PATH=/usr/bin/chromium-browser
-ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true
+# Remove any custom executable path overrides so Puppeteer uses its auto-downloaded cache
+ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=false
 ENV N8N_COMMUNITY_PACKAGES_ENABLED=true
 
 USER node
+
+# Force npm/puppeteer to install the matching browser binary into the node user cache path
+RUN npx puppeteer browsers install chrome
